@@ -3,7 +3,9 @@
 Una Pokedex web construida con HTML, CSS y JavaScript vanilla que consume la
 [PokeAPI](https://pokeapi.co/) para mostrar cualquier pokémon por nombre o número.
 
-![Captura de la Pokedex mostrando a Bulbasaur](images/screenshot.jpg)
+**🔴 Demo en vivo: <https://mystick94.github.io/pokedex/>**
+
+[![Captura de la Pokedex mostrando a Bulbasaur](images/screenshot.jpg)](https://mystick94.github.io/pokedex/)
 
 ## Funcionalidades
 
