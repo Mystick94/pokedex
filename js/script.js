@@ -8,47 +8,67 @@ const buttonPrev = document.querySelector('.btn-prev');
 const buttonNext = document.querySelector('.btn-next');
 
 let searchPokemon = 1;
+let isLoading = false;
 
 const fetchPokemon = async (pokemon) => {
-    const APIResponse = await fetch(`https://pokeapi.co/api/v2/pokemon/${pokemon}`);
-    if (APIResponse.status === 200) {
-    const data = await APIResponse.json();
-    return data;
-    }   
-}
+    try {
+        const APIResponse = await fetch(`https://pokeapi.co/api/v2/pokemon/${pokemon}`);
+        if (APIResponse.status === 200) {
+            return await APIResponse.json();
+        }
+    } catch (error) {
+        // Network failure: fall through to the "not found" state
+    }
+};
+
+const getSprite = (data) => {
+    // Animated black-white sprites only exist up to generation V (#649)
+    const animated =
+        data.sprites.versions['generation-v']['black-white'].animated.front_default;
+    return animated || data.sprites.front_default;
+};
 
 const renderPokemon = async (pokemon) => {
-    pokemonName.innerHTML = 'Loading...';
-    pokemonNumber.innerHTML = '';
+    if (isLoading) return;
+    isLoading = true;
+    buttonPrev.disabled = true;
+    buttonNext.disabled = true;
+
+    pokemonName.textContent = 'Loading...';
+    pokemonNumber.textContent = '';
+
     const data = await fetchPokemon(pokemon);
     if (data) {
-    pokemonName.innerHTML = data.name;
-    pokemonNumber.innerHTML = data.id;
-    pokemonImage.src = data['sprites']['versions']['generation-v']['black-white']['animated']['front_default'];
-    input.value = '';
-    searchPokemon = data.id;
-   }else {
-    pokemonImage.style.display = 'block';
-    pokemonName.innerHTML = 'Not found :c';
-    pokemonNumber.innerHTML = '';
+        pokemonImage.style.display = 'block';
+        pokemonName.textContent = data.name;
+        pokemonNumber.textContent = data.id;
+        pokemonImage.src = getSprite(data);
+        input.value = '';
+        searchPokemon = data.id;
+    } else {
+        pokemonImage.style.display = 'none';
+        pokemonName.textContent = 'Not found :c';
+        pokemonNumber.textContent = '';
     }
-} 
+
+    isLoading = false;
+    buttonPrev.disabled = false;
+    buttonNext.disabled = false;
+};
 
 form.addEventListener('submit', (event) => {
     event.preventDefault();
-    renderPokemon(input.value.toLowerCase());
+    renderPokemon(input.value.trim().toLowerCase());
 });
 
 buttonPrev.addEventListener('click', () => {
     if (searchPokemon > 1) {
-    searchPokemon -= 1;
-    renderPokemon(searchPokemon);
-   }
+        renderPokemon(searchPokemon - 1);
+    }
 });
 
 buttonNext.addEventListener('click', () => {
-    searchPokemon += 1;
-    renderPokemon(searchPokemon);
+    renderPokemon(searchPokemon + 1);
 });
 
 renderPokemon(searchPokemon);
